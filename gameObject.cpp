@@ -1,15 +1,15 @@
 #include "gameObject.h"
 #include <iostream>
+#include <algorithm>
 
 
-//std::mutex GameObject::_mtx;
+std::mutex GameObject::_mtx;
 
 
 GameObject::GameObject()
 {
    
 }
-/*
 GameObject::~GameObject()
 {
     // set up thread barrier before this object is destroyed
@@ -17,4 +17,3 @@ GameObject::~GameObject()
         t.join();
     });
 }
-*/
