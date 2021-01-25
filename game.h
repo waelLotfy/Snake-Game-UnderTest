@@ -7,9 +7,12 @@
 #include "renderer.h"
 #include "snake.h"
 #include <memory>
+#include <future>
+#include "gameObject.h"
 
 
-class Game {
+class Game : public GameObject
+{
  public:
   Game(std::size_t grid_width, std::size_t grid_height);
   void Run(Controller /*const*/ &controller, Renderer &renderer,
@@ -17,10 +20,15 @@ class Game {
   int GetScore() const;
   int GetSize() const;
 
+  // typical behaviour methods
+  void runThread() override; /*New Feature Added : A thread for handling the update.*/
+
  private:
   //Snake snake;
   std::shared_ptr<Snake> snake;
   SDL_Point food;
+  //std::size_t game_target_frame_duration;/*New Feature Added : A thread for handling the update*/
+  //bool running;
 
   std::random_device dev;
   std::mt19937 engine;
@@ -30,7 +38,9 @@ class Game {
   int score{0};
 
   void PlaceFood();
+  void PlaceInitialFood();
   void Update();
+  void UpdateGame();
 };
 
 #endif

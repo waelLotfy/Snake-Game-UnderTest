@@ -118,3 +118,25 @@ float Snake::getHead_y() const/*Object oriented :Feature 1 */
 {
   return head_y;
 }
+
+bool Snake::getDirectionChangeStatus() /*return if the direction is changed*/
+{
+  return directionChangeStatus;
+}
+void Snake::setDirectionChangeStatus(bool status)
+{
+  directionChangeStatus = status ;
+}
+
+bool Snake::isSnakeDirectionChanged()
+{
+  while(!directionChangeStatus)
+  {
+    
+  }
+  directionChangeStatus = false ;
+  std::cout<< "directionChangeStatus in Snake::isSnakeDirectionChanged is " << directionChangeStatus << std::endl;
+  return true ;
+}
+
+  

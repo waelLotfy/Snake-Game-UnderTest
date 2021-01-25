@@ -3,18 +3,27 @@
 #include "SDL.h"
 #include "snake.h"
 
-void Controller::getSnake(std::shared_ptr<Snake> s) /*To get the sanke from the controller*/
+void Controller::setSnake(std::shared_ptr<Snake> s) /*To get the sanke from the controller*/
 {
+  //std::unique_lock<std::mutex> lck(_mtxSnake); //make lock before using the shared snake
   snake = s;
+  //lck.unlock();
 }
 
-void Controller::getTargetFrameDuration(std::size_t t) /*To get the target_frame_duration from the controller*/
+void Controller::setTargetFrameDuration(std::size_t t) /*To get the target_frame_duration from the controller*/
 {
   target_frame_duration = t ;
 }
-void Controller::getRunning(bool &r )
+void Controller::setRunning(bool /*&*/r )
 {
+  //std::lock_guard<std::mutex> lock(_mtxRunning);//make lock before reading the flag running
   running = r ;
+}
+
+bool Controller::getRunning()
+{
+  std::lock_guard<std::mutex> lock(_mtxRunning);//make lock before reading the flag running
+  return running;
 }
 
 void Controller::runThread()
@@ -25,10 +34,13 @@ void Controller::runThread()
 
 void Controller::controlInput() 
 {
-  std::unique_lock<std::mutex> lck(_mtx); //make lock before using the shared objects SDL and snake
+  std::unique_lock<std::mutex> lck0(_mtxSDL); //make lock before using the SDL function
   Uint32 title_timestamp = SDL_GetTicks();
-  std::cout<< "running flag is " << running << std::endl;
-  lck.unlock();
+  lck0.unlock();
+  
+  //std::unique_lock<std::mutex> lck1(_mtxCout); //make lock before using the shared cout
+  //std::cout<< "running flag in controlInput is " << running << std::endl; // For test
+  //lck1.unlock();
   
   Uint32 frame_start;
   Uint32 frame_end;
@@ -41,11 +53,11 @@ void Controller::controlInput()
     // sleep at every iteration to reduce CPU usage
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    std::unique_lock<std::mutex> lck(_mtx); //make lock before using the shared objects SDL and snake
+    std::unique_lock<std::mutex> lck2(_mtxSDL); //make lock before using the SDL function
     frame_start = SDL_GetTicks();
     Controller::HandleInput(running/*, snake*/);
     frame_end = SDL_GetTicks();
-    lck.unlock();
+    lck2.unlock();
     
     // Keep track of how long each loop through the input/update/render cycle
     // takes.
@@ -63,9 +75,9 @@ void Controller::controlInput()
     // smaller than the target ms_per_frame), delay the loop to
     // achieve the correct frame rate. to be removed .
     if (frame_duration < target_frame_duration) {
-      std::unique_lock<std::mutex> lck(_mtx); //make lock before using the SDL function
+      std::unique_lock<std::mutex> lck4(_mtxSDL); //make lock before using the SDL function
       SDL_Delay(target_frame_duration - frame_duration);
-      lck.unlock();
+      lck4.unlock();
     }
   }
 
@@ -74,17 +86,34 @@ void Controller::controlInput()
 
 void Controller::ChangeDirection(/*std::shared_ptr<Snake> snake, */Snake::Direction input,
                                  Snake::Direction opposite) const {
-  if (snake->getDirection() != opposite || snake->getSize() == 1) snake->setDirection(input);
+  //std::unique_lock<std::mutex> lockSnake(_mtxSnake); //make lock before using the Snake 
+  
+  if (snake->getDirection() != opposite || snake->getSize() == 1) 
+  {
+    snake->setDirection(input);
+    snake->setDirectionChangeStatus( true );
+    
+    /*std::unique_lock<std::mutex> lockCout(_mtxCout); //make lock before using the Snake 
+    std::cout<< "directionChangeStatus in Controller::ChangeDirection is " << snake->getDirectionChangeStatus() << std::endl;
+    lockCout.unlock();*/
+    
+  }
+  
+  //lockSnake.unlock();
   return;
 }
 
 void Controller::HandleInput(bool &running/*, std::shared_ptr<Snake> snake*/) const {
+  //std::unique_lock<std::mutex> lockSDL(_mtxSDL); //make lock before using the SDL functions
+  
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
       
-      std::unique_lock<std::mutex> lck(_mtx); //make lock before using the shared objects SDL and snake
+      std::lock_guard<std::mutex> lock(_mtxRunning);//make lock before reading the flag running
       running = false;
+      
+      std::unique_lock<std::mutex> lck(_mtxCout); //make lock before using the shared cout
       std::cout<< "running flag due to SDL_QUIT is " << running << std::endl;
       lck.unlock();
   
@@ -112,4 +141,7 @@ void Controller::HandleInput(bool &running/*, std::shared_ptr<Snake> snake*/) co
       }
     }
   }
+  
+  //lockSDL.unlock();
+
 }

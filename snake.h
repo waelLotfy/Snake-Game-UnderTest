@@ -36,6 +36,9 @@ class Snake {
   //float head_y;
   //std::vector<SDL_Point> body;
   
+  bool getDirectionChangeStatus(); /*return if the direction is changed*/
+  void setDirectionChangeStatus(bool status);
+  bool isSnakeDirectionChanged();
   
  private:
   void UpdateHead();
@@ -53,6 +56,8 @@ class Snake {
   
   float head_x;
   float head_y;
+  
+  bool directionChangeStatus{false} ;
 
 };
 

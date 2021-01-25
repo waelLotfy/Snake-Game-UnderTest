@@ -18,9 +18,11 @@ class GameObject {
   
  protected: 
   
-    std::vector<std::thread> threads; // holds all threads that have been launched within this object
-    static std::mutex _mtx;           // mutex shared by all game objects for protecting cout and other shared objects
-
+    std::vector<std::thread> threads;  // holds all threads that have been launched within this object
+    static std::mutex _mtxSnake;       // mutex shared by all game objects for protecting the shared snake
+    static std::mutex _mtxFood;        // mutex shared by all game objects for protecting the shared food
+    static std::mutex _mtxCout;        // mutex shared by all game objects for protecting the shared cout
+    static std::mutex _mtxSDL;         // mutex shared by all game objects for protecting the shared SDL
   
  private:
   

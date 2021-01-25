@@ -3,7 +3,11 @@
 #include <algorithm>
 
 
-std::mutex GameObject::_mtx;
+//std::mutex GameObject::_mtx;
+std::mutex GameObject::_mtxSnake;       // mutex shared by all game objects for protecting the shared snake
+std::mutex GameObject::_mtxFood;        // mutex shared by all game objects for protecting the shared food
+std::mutex GameObject::_mtxCout;        // mutex shared by all game objects for protecting the shared cout
+std::mutex GameObject::_mtxSDL;         // mutex shared by all game objects for protecting the shared SDL
 
 
 GameObject::GameObject()
